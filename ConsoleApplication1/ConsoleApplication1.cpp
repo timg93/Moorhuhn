@@ -81,15 +81,16 @@ class GameWindow : public Gosu::Window {
 public:
 	Gosu::Image background;
 	Gosu::Image Schuss;
+	Gosu::Sample shot;
+	Gosu::Sample reload;
 	Gosu::Image ImgH1;
 	Gosu::Image ImgH2;
-
 	GameWindow()
 		:Window(1920, 1200)
-		, background("Back.jpg"), Schuss("Schuss.png"), ImgH1("H1.jpg"), ImgH2("H1.jpg")
-	{
-		set_caption("Gosu Tutorial Game");
-	}
+		,background("Back.jpg"), Schuss("Schuss.png"), ImgH1("H1.jpg"), ImgH2("H1.jpg"), shot("shot.wav"),reload("reload.wav")
+		{		
+			set_caption("Gosu Tutorial Game");
+		}
 
 	double x, y;
 	bool Klick_links, Klick_links_alt, Klick_rechts, Klick_rechts_alt, schiesen, laden;
@@ -123,6 +124,7 @@ public:
 				Klick_links_alt = true;
 				schiesen = true;
 				Schüsse = Schüsse - 1;
+				shot.play(1, 1, false);
 
 			}
 			else if (!Klick_links)
@@ -145,6 +147,8 @@ public:
 				Klick_rechts_alt = true;
 				laden = true;
 				Schüsse = 5;
+				reload.play(1, 1.9, false);
+				
 
 			}
 			else if (!Klick_rechts)
@@ -229,6 +233,13 @@ public:
 					x - 1, (y + 25), Gosu::Color::BLACK,
 					ZEbene
 				);
+
+				/*graphics().draw_line(
+					x, (y - 25), Gosu::Color::BLACK,
+					x, (y + 25), Gosu::Color::BLACK,
+					1.0
+				);*/
+
 			}
 
 		}
