@@ -1,12 +1,12 @@
 // ConsoleApplication1.cpp : Definiert den Einstiegspunkt für die Konsolenanwendung.
-//
+// geändert, damit die Verzeichnisse stimmten
 
 #include "stdafx.h"
+
 #include <Gosu/Gosu.hpp>
 #include <Gosu/AutoLink.hpp>
 
 
-#include "stdafx.h"
 #include <vector>
 #include <iostream>
 #include <math.h>
@@ -35,6 +35,7 @@ public:
 	void update() override {
 		x = input().mouse_x();
 		y = input().mouse_y();
+		
 
 
 		// Klicke linke Maustaste
