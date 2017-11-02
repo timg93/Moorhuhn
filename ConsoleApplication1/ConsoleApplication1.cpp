@@ -342,7 +342,7 @@ public:
 		ueberschrift.draw("Punkte", 1542, 0, 9, 1, 1, Gosu::Color::BLACK);
 		punkte.draw(string_Punktestand, 1520, 24, 9, 1, 1, Gosu::Color::BLACK);
 
-
+		// zeile einfach löschen
 
 
 		// Fadenkreuz
