@@ -28,22 +28,22 @@ using namespace std;
 class Huhn
 {
 public:
-	bool Sichtbarkeit, Wandern;
-	double XPos, YPos, ZEbene, Winkel, PfAwX, PfAwY, SkalX, SkalY, Punkte;
+	bool Sichtbarkeit, Wandern, von_links_wandern;
+	double XPos, YPos, ZEbene, Winkel, PfAwX, PfAwY, SkalX, SkalY, Punkte, Höhe, Breite, start_wandern, Faktor_Bewegung;
 	string JPG;
 	Gosu::Image Bild;
 
 	void draw()
 	{
-		if (Sichtbarkeit)
-		{
-			this->ZEbene = 7;
-		}
-		else
-		{
-			this->ZEbene = -7;
-		}
+		if (this->Wandern && this->Sichtbarkeit && this->von_links_wandern) { this->XPos = this->XPos + 1 * this->Faktor_Bewegung; }
+		if (this->Wandern && this->Sichtbarkeit & !this->von_links_wandern) { this->XPos = this->XPos - 1 * this->Faktor_Bewegung; }
+		//else if (this->Wandern && (this->XPos >= 1920+ this->Breite))	{this->XPos = this->start_wandern;}
+		if (this->XPos + this->Breite > 1920) { this->Sichtbarkeit = false; this->XPos = this->start_wandern; }
+		
+		if (this->Sichtbarkeit)	{this->ZEbene = 7;}
+		else{this->ZEbene = -7;	}
 
+		
 
 		Bild.draw_rot(
 			this->XPos,				//X-Position
@@ -64,18 +64,22 @@ public:
 		// Die Funktion später nur ausführen wenn ein gültiger Klick gemacht wurde
 	{
 
-		int Höhe = this->Bild.height()* this->SkalX;
-		int Breite = this->Bild.height()*this->SkalY;
+		
+		 
 
 		if (((x >= this->XPos) && (x <= (this->XPos + Breite))) &&
-			((y >= this->YPos) && (y <= (this->YPos + Höhe))) &&	this->Sichtbarkeit)
+			((y >= this->YPos) && (y <= (this->YPos + Höhe))) && this->Sichtbarkeit)
 		{
 
-			cout << this->ZEbene;
-			this->ZEbene = -7;
-			cout << "getroffen!" << this->ZEbene<< endl;
-			//draw(); ICh will das neu zeichen bzw. nach hinten setzen sobald es getroffen wurde
+			this->ZEbene = -7;			
 			Sichtbarkeit = false;
+			if (Wandern)
+			{
+				this->XPos = this->start_wandern;
+
+			}
+
+
 			return this->Punkte;
 
 		}
@@ -85,16 +89,22 @@ public:
 		}
 
 	}
-	Huhn(bool sichtbarkeit, bool wandern, double xpos, double ypos, double zebene, double winkel,
+	Huhn(bool sichtbarkeit, bool wandern, bool von_wandern, double Faktor_speed, double xpos, double ypos, double zebene, double winkel,
 		double pfawx, double pfawy, double skalx, double skaly, double punkte, string jpg)
 		: Bild(jpg)
 
 
 	{
+		
+		this->Höhe = this->Bild.height()* this->SkalX;
+		this->Breite = this->Bild.height()*this->SkalY;
+
 		this->Sichtbarkeit = sichtbarkeit;
 		this->Wandern = wandern;
-		this->XPos = xpos;
-		this->YPos = ypos;
+		this->von_links_wandern = von_wandern;
+		this->Faktor_Bewegung = Faktor_speed;
+		this->XPos = xpos ;
+		this->YPos = ypos ;
 		this->ZEbene = zebene;
 		this->Winkel = winkel;
 		this->PfAwX = pfawx;
@@ -104,12 +114,19 @@ public:
 		this->Punkte = punkte;
 		this->JPG = jpg;
 
+		this->Höhe = this->Bild.height()* this->SkalX;
+		this->Breite = this->Bild.height()*this->SkalY;
+
+		// #tim muss noch unterscheidung rein, wenns von rechts wandern soll muss es anderen Startwert haben...
+		if (this->Wandern)
+		{
+			this->start_wandern = -this->Breite;
+			this->XPos = this->start_wandern;
+		}
+
 	}
 
 };
-
-
-
 
 
 
@@ -122,23 +139,46 @@ public:
 	Gosu::Sample reload;
 	Gosu::Image ImgH1;
 	Gosu::Image ImgH2;
+	Gosu::Font punkte;
+	Gosu::Font ueberschrift;
+
 	
 
 	GameWindow()
 		:Window(1920, 1200)
-		, background("Back.jpg"), Schuss("Schuss.png"), ImgH1("H1.jpg"), ImgH2("H1.jpg"), shot("shot.wav"), reload("reload.wav")
+		, background("Back.jpg"), Schuss("Schuss.png"), ImgH1("H1.jpg"), ImgH2("H1.jpg"), shot("shot.wav"), reload("reload.wav"),
+		punkte(80),	ueberschrift(40)
+
 	{
 		set_caption("Gosu Tutorial Game");
 
 		Huehner.clear();
 
-		Huhn H1(true, false, 100, 100, 7, 0, 0, 0, 1, 1, 25, "H1.jpg");
-		Huhn H2(true, false, 250, 250, 7, 0, 0, 0, 1, 1, 25, "H1.jpg");
-		Huhn H3(true, false, 500, 500, 7, 0, 0, 0, 1, 1, 25, "H1.jpg");
+		/*Huhn(bool sichtbarkeit, bool wandern, bool von_wandern, double Faktor_speed, double xpos, double ypos, double zebene, double winkel,
+		double pfawx, double pfawy, double skalx, double skaly, double punkte, string jpg)
+		: Bild(jpg)*/
 
-		Huehner.push_back(H1);
-		Huehner.push_back(H2);
-		Huehner.push_back(H3);
+		Huhn H01(false, false, true, 1, 120, 450, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Auf Heuballen
+		Huhn H02(false, false, true, 1, 245, 620, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Rechts neben Heuballen
+		Huhn H03(false, false, true, 1, 65, 281, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//ganz links Scheunendach
+		Huhn H04(false, false, true, 1, 765, 75, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Eier auf Strommasten
+		Huhn H05(false, false, true, 1, 910, 155, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Schornstein Mitte
+		Huhn H06(false, false, true, 1, 1600, 130, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Schornstein rechts
+		Huhn H07(false, false, true, 1, 990, 410, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Zaun links
+		Huhn H08(false, false, true, 1, 1360, 400, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Zaun mitte
+		Huhn H09(false, false, true, 1, 1780, 450, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//Zaun rechts
+
+		Huhn H50(false, true, true, 1, 500, 500, -7, 0, 0, 0, 0.2, 0.2, 25, "H1.jpg");		//fliegende Hühner
+
+		Huehner.push_back(H01);
+		Huehner.push_back(H02);
+		Huehner.push_back(H03);
+		Huehner.push_back(H04);
+		Huehner.push_back(H05);
+		Huehner.push_back(H06);
+		Huehner.push_back(H07);
+		Huehner.push_back(H08);
+		Huehner.push_back(H09);
 
 
 
@@ -147,7 +187,8 @@ public:
 	double x, y, Punktestand = 0;
 	bool Klick_links, Klick_links_alt, Klick_rechts, Klick_rechts_alt, schiesen, laden;
 	bool H1 = true, H2 = true, H3 = true, H4, H5, H6, H7, H8, H9, H10;
-	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 3, Zufallszahl, i = 0, j=0;
+	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 9, Zufallszahl, Zi = 0;
+	string string_Punktestand;
 	vector<Huhn> Huehner;
 	
 	
@@ -175,11 +216,16 @@ public:
 					Schüsse = Schüsse - 1;
 
 					if (schiesen) // Wird nur durchlaufen wenn ein gültiger Schuss abgegeben wurde
-						for (Huhn elem : Huehner)
-						{
-							Punktestand = elem.getroffen(x, y) /*+ Punktestand*/;
-							cout << " ... abgearbeitet";
+						
+						for (Huhn& elem : Huehner)
+						{							
+							//cout << elem.XPos;
+
+							Punktestand = elem.getroffen(x, y) + Punktestand/*+ Punktestand*/;
+							cout << Punktestand << endl;
 						}
+					//cout << endl;
+					//cout << Huehner[0].ZEbene << endl;
 
 				}
 				else if (!Klick_links)
@@ -204,16 +250,18 @@ public:
 
 		
 
-		if (i<100)
+		if (Zi<100)
 		{
-			i++;
+			Zi++;
 			//cout << "     " << i << endl;
 		}
 		else
 		{
 			Zufallszahl = (rand() % ((Zufallszahl_bis + 1) - Zufallszahl_von)) + Zufallszahl_von;
-			cout << Zufallszahl << endl;
-			i = 0;
+			Huehner[Zufallszahl-1].ZEbene = 7;
+			Huehner[Zufallszahl-1].Sichtbarkeit = true;
+			//cout << Zufallszahl << endl;
+			Zi = 0;
 		}
 
 		/*
@@ -279,55 +327,20 @@ public:
 		//
 	}
 	void draw() override {
-		/*
-		Ebenen, die Ebene 0 ist der Hintergrund -nach hinten + nach vorne
-
-		-0.5
-
-		0   = Hintergrund
-
-		7	= Patronen
-		10  = Fadenkreuz
-
-
-		void Gosu::Image::draw_rot	(
-		double 	x,						Position
-		double 	y,
-		ZPos 	z,
-		double 	angle,
-		double 	center_x = 0.5,
-		double 	center_y = 0.5,
-		double 	scale_x = 1,			skalieren
-		double 	scale_y = 1,
-		Color 	c = Color::WHITE,
-		AlphaMode 	mode = AM_DEFAULT
-		)
 
 
 
-
-		*/
-
-		//Huhn(sichtbarkeit, wandern,  xpos,  ypos,  zebene,  winkel,
-		//	 pfawx,  pfawy,  skalx,  skaly,  punkte,  jpg)
-
-		//Hüner nur 1mal zeichnen
-
-		if (j < 1)
-		{
-			
-			j++;
-		}
-
-		for (Huhn elem : Huehner) {
+		for (Huhn& elem : Huehner) {
 			elem.draw();
-		}
+		}	
+		//punkt.draw(const std::string & text, double x, double y, ZPOS z, 
+		//           double scale_x = 1, double scale_y = 1, Color  c = Color::WHITE, 
+		//           AlphaMode  mode= AM_DEFAULT)
+		//Draws text, so the top left corner of the text is at (x,y)
 
-	
-
-
-
-		
+		string_Punktestand = Punktestand;
+		ueberschrift.draw("Punkte", 1542, 0, 9, 1, 1, Gosu::Color::BLACK);
+		punkte.draw(string_Punktestand, 1520, 24, 9, 1, 1, Gosu::Color::BLACK);
 
 
 
@@ -465,77 +478,7 @@ public:
 
 		};
 
-		/*
-		//Hühner
-		{
-		//Hier können die Werte für alle Hühner verändert werden
-		double Pos_Huhn_X = 0.0;
-		double Pos_Huhn_Y = 0.0;
-		double ZEbene;
-		//double Winkel= 0.0;
-
-		// Huhn 1 Heuballen oben
-		{
-
-		if(H1)	{	ZEbene = 7.0;		}
-		else	{	ZEbene = -7.0;		}
-		ImgH1.draw_rot(
-		100,				//X-Position
-		450,				//Y-Position
-		ZEbene,				//Z-Ebene
-		0,					//Winkel
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Skalierung X
-		0.5,				// Skalierung Y
-		Gosu::Color::WHITE
-		//Gosu::AlphaMode::AM_INTERPOLATE
-		);
-		}
-		// Huhn 2 Heuballen rechts
-		{
-
-		if (H2) { ZEbene = 7.0; }
-		else { ZEbene = -7.0; }
-		ImgH2.draw_rot(
-		240,				//X-Position
-		610,				//Y-Position
-		ZEbene,				//Z-Ebene
-		0,					//Winkel
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Skalierung X
-		0.5,				// Skalierung Y
-		Gosu::Color::WHITE
-		//Gosu::AlphaMode::AM_INTERPOLATE
-		);
-		}
-		// Huhn 3 Scheune ganz links
-		{
-
-		if (H2) { ZEbene = 7.0; }
-		else { ZEbene = -7.0; }
-		ImgH2.draw_rot(
-		50,				//X-Position
-		280,				//Y-Position
-		ZEbene,				//Z-Ebene
-		0,					//Winkel
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Punkt für Angriffswinkel X
-		0.5,				// Skalierung X
-		0.5,				// Skalierung Y
-		Gosu::Color::WHITE
-		//Gosu::AlphaMode::AM_INTERPOLATE
-		);
-		}
-
-
-
-
-
-		// hier die anderen Hühner noch einfügen
-		}
-		*/
+		
 
 
 
@@ -550,6 +493,7 @@ public:
 
 	};
 };
+
 
 
 int main()
