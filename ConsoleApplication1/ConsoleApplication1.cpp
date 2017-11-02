@@ -145,6 +145,7 @@ public:
 	Gosu::Image Schuss;
 	Gosu::Sample shot;
 	Gosu::Sample reload;
+	Gosu::Sample empty;
 	//Gosu::Image ImgH1;
 	//Gosu::Image ImgH2;
 	Gosu::Font Punkte_Anzeige;
@@ -156,7 +157,7 @@ public:
 
 	GameWindow()
 		:Window(1920, 1200)
-		, background("Back.jpg"), background_finished("Screen_finished.png"), Schuss("Schuss.png"), /*ImgH1("H1.jpg"), ImgH2("H1.jpg"),*/ shot("shot.wav"), reload("reload.wav"),
+		, background("Back.jpg"), background_finished("Screen_finished.png"), Schuss("Schuss.png"), /*ImgH1("H1.jpg"), ImgH2("H1.jpg"),*/ shot("shot.wav"), reload("reload.wav"), empty("leer.wav"),
 		Punkte_Anzeige(80), Punkte_Überschrift(40), Zeit_Anzeige(80), Zeit_Überschrift(40)
 
 	{
@@ -231,12 +232,61 @@ public:
 		{
 			Punktestand = 0;
 			Zeit_msec = 3 * 60;
+			Schüsse = 5;
 			
 		}
 
 		if (spiel_läuft)
 		{
 			// Klicke linke Maustaste
+			
+
+			
+			{
+				if (Schüsse >= 0)
+				{
+					Klick_links = input().down(Gosu::MS_LEFT);
+					if (Klick_links && !Klick_links_alt &&  (Schüsse>=1))
+					{
+						Klick_links_alt = true;
+						
+						shot.play(1, 1, false);// hier aktion für Schuss
+						Schüsse = Schüsse - 1;
+
+						if (schiesen) // Wird nur durchlaufen wenn ein gültiger Schuss abgegeben wurde
+							for (Huhn& elem : Huehner)
+							{
+								Punktestand = elem.getroffen(x, y) + Punktestand;
+							}
+
+
+					}
+					else if (Klick_links && !Klick_links_alt && (Schüsse == 0))
+					{
+						Klick_links_alt = true;
+						empty.play(1, 1, false);
+					}
+					else if (!Klick_links)
+					{
+						Klick_links_alt = false;
+						schiesen = false;
+
+					}
+
+					else
+					{
+						Klick_links = false;
+					}
+
+				}
+				else
+				{
+					schiesen = false;
+				}
+
+				
+
+			}
 			{
 				if (Schüsse >= 1)
 				{
@@ -244,18 +294,14 @@ public:
 					if (Klick_links && !Klick_links_alt)
 					{
 						Klick_links_alt = true;
-						schiesen = true;
+
 						shot.play(1, 1, false);// hier aktion für Schuss
 						Schüsse = Schüsse - 1;
 
 						if (schiesen) // Wird nur durchlaufen wenn ein gültiger Schuss abgegeben wurde
-
 							for (Huhn& elem : Huehner)
 							{
-
-
-								Punktestand = elem.getroffen(x, y) + Punktestand/*+ Punktestand*/;
-
+								Punktestand = elem.getroffen(x, y) + Punktestand;
 							}
 
 
@@ -278,8 +324,11 @@ public:
 					schiesen = false;
 				}
 
+
+
 			}
 
+			
 
 			// Hühner wieder auftauchen lassen
 			{
