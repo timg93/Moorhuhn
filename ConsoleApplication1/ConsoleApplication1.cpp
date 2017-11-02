@@ -141,20 +141,23 @@ public:
 class GameWindow : public Gosu::Window {
 public:
 	Gosu::Image background;
+	Gosu::Image background_finished;
 	Gosu::Image Schuss;
 	Gosu::Sample shot;
 	Gosu::Sample reload;
 	//Gosu::Image ImgH1;
 	//Gosu::Image ImgH2;
 	Gosu::Font Punkte_Anzeige;
-	Gosu::Font ueberschrift;
+	Gosu::Font Punkte_Überschrift;
+	Gosu::Font Zeit_Anzeige;
+	Gosu::Font Zeit_Überschrift;
 
 
 
 	GameWindow()
 		:Window(1920, 1200)
-		, background("Back.jpg"), Schuss("Schuss.png"), /*ImgH1("H1.jpg"), ImgH2("H1.jpg"),*/ shot("shot.wav"), reload("reload.wav"),
-		Punkte_Anzeige(80), ueberschrift(40)
+		, background("Back.jpg"), background_finished("Screen_finished.png"), Schuss("Schuss.png"), /*ImgH1("H1.jpg"), ImgH2("H1.jpg"),*/ shot("shot.wav"), reload("reload.wav"),
+		Punkte_Anzeige(80), Punkte_Überschrift(40), Zeit_Anzeige(80), Zeit_Überschrift(40)
 
 	{
 		set_caption("Gosu Tutorial Game");
@@ -199,9 +202,9 @@ public:
 
 	double x, y, Punktestand = 0;
 	bool Klick_links, Klick_links_alt, Klick_rechts, Klick_rechts_alt, schiesen, laden;
-	bool H1 = true, H2 = true, H3 = true, H4, H5, H6, H7, H8, H9, H10;
-	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 13, Zufallszahl, Zi = 0;
-	string string_Punktestand;
+	bool H1 = true, H2 = true, H3 = true, spiel_läuft=true;
+	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 13, Zufallszahl, Zi = 0, Zeit_sec, Zeit_msec = 10*60;
+	string string_Punktestand, string_Zeit;
 	vector<Huhn> Huehner;
 	
 
@@ -213,267 +216,302 @@ public:
 
 
 	void update() override {
-		Sleep(10);
+		//Sleep(10);
 		x = input().mouse_x();
 		y = input().mouse_y();
 		srand(time(NULL));
-
-		// Klicke linke Maustaste
+		if (Zeit_msec >= 0) { spiel_läuft = true; }
+		else 
+		{ 
+			spiel_läuft = false; 
+			
+		}
+		
+		if ((input().down(Gosu::KB_ENTER)|| input().down(Gosu::KB_N))&& !(spiel_läuft))
 		{
-			if (Schüsse >= 1)
+			Punktestand = 0;
+			Zeit_msec = 3 * 60;
+			
+		}
+
+		if (spiel_läuft)
+		{
+			// Klicke linke Maustaste
 			{
-				Klick_links = input().down(Gosu::MS_LEFT);
-				if (Klick_links && !Klick_links_alt)
+				if (Schüsse >= 1)
 				{
-					Klick_links_alt = true;
-					schiesen = true;
-					shot.play(1, 1, false);// hier aktion für Schuss
-					Schüsse = Schüsse - 1;
+					Klick_links = input().down(Gosu::MS_LEFT);
+					if (Klick_links && !Klick_links_alt)
+					{
+						Klick_links_alt = true;
+						schiesen = true;
+						shot.play(1, 1, false);// hier aktion für Schuss
+						Schüsse = Schüsse - 1;
 
-					if (schiesen) // Wird nur durchlaufen wenn ein gültiger Schuss abgegeben wurde
+						if (schiesen) // Wird nur durchlaufen wenn ein gültiger Schuss abgegeben wurde
 
-						for (Huhn& elem : Huehner)
-						{
-							
+							for (Huhn& elem : Huehner)
+							{
 
-							Punktestand = elem.getroffen(x, y) + Punktestand/*+ Punktestand*/;
-							
-						}
-					
+
+								Punktestand = elem.getroffen(x, y) + Punktestand/*+ Punktestand*/;
+
+							}
+
+
+					}
+					else if (!Klick_links)
+					{
+						Klick_links_alt = false;
+						schiesen = false;
+
+					}
+
+					else
+					{
+						Klick_links = false;
+					}
 
 				}
-				else if (!Klick_links)
+				else
 				{
-					Klick_links_alt = false;
 					schiesen = false;
+				}
 
+			}
+
+
+			// Hühner wieder auftauchen lassen
+			{
+				if (Zi < 50)
+				{
+					Zi++;
+
+				}
+				else
+				{
+					Zufallszahl = (rand() % ((Zufallszahl_bis + 1) - Zufallszahl_von)) + Zufallszahl_von;
+					Huehner[Zufallszahl - 1].ZEbene = 7;
+					Huehner[Zufallszahl - 1].Sichtbarkeit = true;
+
+					Zi = 0;
+				}
+			}
+
+
+
+			//Klicke rechte Maustaste
+			{
+				Klick_rechts = input().down(Gosu::KB_SPACE) || input().down(Gosu::MS_RIGHT);
+				if (Klick_rechts && !Klick_rechts_alt)
+				{
+					Klick_rechts_alt = true;
+					laden = true;
+					Schüsse = 5;
+					reload.play(1, 1.9, false);
+
+				}
+				else if (!Klick_rechts)
+				{
+					Klick_rechts_alt = false;
+					laden = false;
 				}
 
 				else
 				{
-					Klick_links = false;
+					Klick_rechts = false;
 				}
+			}
 
-			}
-			else
-			{
-				schiesen = false;
-			}
+			//
 
 		}
 
-
-		// Hühner wieder auftauchen lassen
-		{
-			if (Zi < 50)
-			{
-				Zi++;
-				
-			}
-			else
-			{
-				Zufallszahl = (rand() % ((Zufallszahl_bis + 1) - Zufallszahl_von)) + Zufallszahl_von;
-				Huehner[Zufallszahl - 1].ZEbene = 7;
-				Huehner[Zufallszahl - 1].Sichtbarkeit = true;
-				
-				Zi = 0;
-			}
-		}
 		
-
-
-		//Klicke rechte Maustaste
-		{
-			Klick_rechts = input().down(Gosu::KB_SPACE) || input().down(Gosu::MS_RIGHT);
-			if (Klick_rechts && !Klick_rechts_alt)
-			{
-				Klick_rechts_alt = true;
-				laden = true;
-				Schüsse = 5;
-				reload.play(1, 1.9, false);
-
-			}
-			else if (!Klick_rechts)
-			{
-				Klick_rechts_alt = false;
-				laden = false;
-			}
-
-			else
-			{
-				Klick_rechts = false;
-			}
-		}
-
-		//
 	}
 
 
 	void draw() override {
 
 
-
-		for (Huhn& elem : Huehner) {
-			elem.draw();
-		}
-		//punkt.draw(const std::string & text, double x, double y, ZPOS z, 
-		//           double scale_x = 1, double scale_y = 1, Color  c = Color::WHITE, 
-		//           AlphaMode  mode= AM_DEFAULT)
-		//Draws text, so the top left corner of the text is at (x,y)
-
-
-		string_Punktestand = to_string(int(Punktestand) );	
-
-		ueberschrift.draw("Punkte", 1542, 0, 9, 1, 1, Gosu::Color::BLACK);
-		Punkte_Anzeige.draw(string_Punktestand, 1520, 24, 9, 1, 1, Gosu::Color::BLACK);
-
-
-
-
-		// Fadenkreuz
+		if (spiel_läuft)
 		{
-			double ZEbene = 10;
-			// X Fadenkreuz
-			{ // X Fadenkreuz
-				graphics().draw_line(
-					(x - 25), y, Gosu::Color::BLACK,
-					(x + 25), y, Gosu::Color::BLACK,
-					ZEbene
-				);
-				graphics().draw_line(
-					(x - 25), y + 1, Gosu::Color::BLACK,
-					(x + 25), y + 1, Gosu::Color::BLACK,
-					ZEbene
-				);
-				graphics().draw_line(
-					(x - 25), y - 1, Gosu::Color::BLACK,
-					(x + 25), y - 1, Gosu::Color::BLACK,
-					ZEbene
-				);
+			Zeit_msec = Zeit_msec - 1;
+			cout << Zeit_msec << endl;
+
+			for (Huhn& elem : Huehner) {
+				elem.draw();
 			}
 
-			// Y Fadenkreuz
+			//punkt.draw(const std::string & text, double x, double y, ZPOS z, 
+			//           double scale_x = 1, double scale_y = 1, Color  c = Color::WHITE, 
+			//           AlphaMode  mode= AM_DEFAULT)
+			//Draws text, so the top left corner of the text is at (x,y)
+
+
+			string_Punktestand = to_string(int(Punktestand));
+
+			Punkte_Überschrift.draw("Punkte", 1542, 0, 9, 1, 1, Gosu::Color::BLACK);
+			Punkte_Anzeige.draw(string_Punktestand, 1520, 24, 9, 1, 1, Gosu::Color::BLACK);
+
+			
+			string_Zeit = to_string(Zeit_msec/60);
+
+			Zeit_Überschrift.draw("Zeit", 1350, 0, 9, 1, 1, Gosu::Color::BLACK);
+			Zeit_Anzeige.draw(string_Zeit, 1350, 24, 9, 1, 1, Gosu::Color::BLACK);
+
+			// Fadenkreuz
 			{
-				graphics().draw_line(
-					x, (y - 25), Gosu::Color::BLACK,
-					x, (y + 25), Gosu::Color::BLACK,
-					ZEbene
-				);
-				graphics().draw_line(
-					x + 1, (y - 25), Gosu::Color::BLACK,
-					x + 1, (y + 25), Gosu::Color::BLACK,
-					ZEbene
-				);
-				graphics().draw_line(
-					x - 1, (y - 25), Gosu::Color::BLACK,
-					x - 1, (y + 25), Gosu::Color::BLACK,
-					ZEbene
-				);
+				double ZEbene = 10;
+				// X Fadenkreuz
+				{ // X Fadenkreuz
+					graphics().draw_line(
+						(x - 25), y, Gosu::Color::BLACK,
+						(x + 25), y, Gosu::Color::BLACK,
+						ZEbene
+					);
+					graphics().draw_line(
+						(x - 25), y + 1, Gosu::Color::BLACK,
+						(x + 25), y + 1, Gosu::Color::BLACK,
+						ZEbene
+					);
+					graphics().draw_line(
+						(x - 25), y - 1, Gosu::Color::BLACK,
+						(x + 25), y - 1, Gosu::Color::BLACK,
+						ZEbene
+					);
+				}
+
+				// Y Fadenkreuz
+				{
+					graphics().draw_line(
+						x, (y - 25), Gosu::Color::BLACK,
+						x, (y + 25), Gosu::Color::BLACK,
+						ZEbene
+					);
+					graphics().draw_line(
+						x + 1, (y - 25), Gosu::Color::BLACK,
+						x + 1, (y + 25), Gosu::Color::BLACK,
+						ZEbene
+					);
+					graphics().draw_line(
+						x - 1, (y - 25), Gosu::Color::BLACK,
+						x - 1, (y + 25), Gosu::Color::BLACK,
+						ZEbene
+					);
+				}
+
 			}
+
+			// Schüsse
+			{
+
+				//alle Werte der Patronen können hier zentral geändert werden
+				double Patrone_X = 1750;
+				double Patrone_Y = 1050;
+				double Patrone_Z = 7;
+				double Winkel_Patrone = -30;
+				double skalierungX = 0.35;
+				double skalierungY = 0.35;
+
+				//Schuss 1
+				if (Schüsse >= 1)
+				{
+					Schuss.draw_rot(
+						Patrone_X,
+						Patrone_Y,
+						Patrone_Z,
+						Winkel_Patrone,
+						0.5,
+						0.5,
+						skalierungX,
+						0.35,
+						Gosu::Color::WHITE
+						//Gosu::AlphaMode::AM_INTERPOLATE
+					);
+				}
+				if (Schüsse >= 2)
+				{
+					Schuss.draw_rot(
+						Patrone_X - 75,
+						Patrone_Y,
+						Patrone_Z,
+						Winkel_Patrone,
+						0.5,
+						0.5,
+						skalierungX,
+						0.35,
+						Gosu::Color::WHITE
+						//Gosu::AlphaMode::AM_INTERPOLATE
+					);
+				}
+				if (Schüsse >= 3)
+				{
+					Schuss.draw_rot(
+						Patrone_X - 150,
+						Patrone_Y,
+						Patrone_Z,
+						Winkel_Patrone,
+						0.5,
+						0.5,
+						skalierungX,
+						0.35,
+						Gosu::Color::WHITE
+						//Gosu::AlphaMode::AM_INTERPOLATE
+					);
+				}
+				if (Schüsse >= 4)
+				{
+					Schuss.draw_rot(
+						Patrone_X - 225,
+						Patrone_Y,
+						Patrone_Z,
+						Winkel_Patrone,
+						0.5,
+						0.5,
+						skalierungX,
+						0.35,
+						Gosu::Color::WHITE
+						//Gosu::AlphaMode::AM_INTERPOLATE
+					);
+				}
+				if (Schüsse >= 5)
+				{
+					Schuss.draw_rot(
+						Patrone_X - 300,
+						Patrone_Y,
+						Patrone_Z,
+						Winkel_Patrone,
+						0.5,
+						0.5,
+						skalierungX,
+						0.35,
+						Gosu::Color::WHITE
+						//Gosu::AlphaMode::AM_INTERPOLATE
+					);
+				}
+
+			};
+
+			
+			background.draw_rot(
+				0, 0, 0.0,
+				0.0,
+				0.0, 0.0
+			);
 
 		}
-
-		// Schüsse
+		else
 		{
+			background_finished.draw_rot(0, 0, 11, 0);
 
-			//alle Werte der Patronen können hier zentral geändert werden
-			double Patrone_X = 1750;
-			double Patrone_Y = 1050;
-			double Patrone_Z = 7;
-			double Winkel_Patrone = -30;
-			double skalierungX = 0.35;
-			double skalierungY = 0.35;
-
-			//Schuss 1
-			if (Schüsse >= 1)
-			{
-				Schuss.draw_rot(
-					Patrone_X,
-					Patrone_Y,
-					Patrone_Z,
-					Winkel_Patrone,
-					0.5,
-					0.5,
-					skalierungX,
-					0.35,
-					Gosu::Color::WHITE
-					//Gosu::AlphaMode::AM_INTERPOLATE
-				);
-			}
-			if (Schüsse >= 2)
-			{
-				Schuss.draw_rot(
-					Patrone_X - 75,
-					Patrone_Y,
-					Patrone_Z,
-					Winkel_Patrone,
-					0.5,
-					0.5,
-					skalierungX,
-					0.35,
-					Gosu::Color::WHITE
-					//Gosu::AlphaMode::AM_INTERPOLATE
-				);
-			}
-			if (Schüsse >= 3)
-			{
-				Schuss.draw_rot(
-					Patrone_X - 150,
-					Patrone_Y,
-					Patrone_Z,
-					Winkel_Patrone,
-					0.5,
-					0.5,
-					skalierungX,
-					0.35,
-					Gosu::Color::WHITE
-					//Gosu::AlphaMode::AM_INTERPOLATE
-				);
-			}
-			if (Schüsse >= 4)
-			{
-				Schuss.draw_rot(
-					Patrone_X - 225,
-					Patrone_Y,
-					Patrone_Z,
-					Winkel_Patrone,
-					0.5,
-					0.5,
-					skalierungX,
-					0.35,
-					Gosu::Color::WHITE
-					//Gosu::AlphaMode::AM_INTERPOLATE
-				);
-			}
-			if (Schüsse >= 5)
-			{
-				Schuss.draw_rot(
-					Patrone_X - 300,
-					Patrone_Y,
-					Patrone_Z,
-					Winkel_Patrone,
-					0.5,
-					0.5,
-					skalierungX,
-					0.35,
-					Gosu::Color::WHITE
-					//Gosu::AlphaMode::AM_INTERPOLATE
-				);
-			}
-
-		};
+			Punkte_Überschrift.draw("Endpunktestand", 500, 500, 12, 1, 1, Gosu::Color::WHITE);
+			Punkte_Anzeige.draw(string_Punktestand, 800, 450, 12, 1, 1, Gosu::Color::WHITE);
+			// Spiel fertig
+		}
 
 
-
-
-
-
-
-		background.draw_rot(
-			0, 0, 0.0,
-			0.0,
-			0.0, 0.0
-		);
+		
 
 
 	};
