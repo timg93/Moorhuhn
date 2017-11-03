@@ -204,7 +204,7 @@ public:
 	double x, y, Punktestand = 0;
 	bool Klick_links, Klick_links_alt, Klick_rechts, Klick_rechts_alt, schiesen, laden;
 	bool H1 = true, H2 = true, H3 = true, spiel_läuft=true;
-	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 13, Zufallszahl, Zi = 0, Zeit_sec, Zeit_msec = 10*60;
+	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 13, Zufallszahl, Zi = 0, Zeit_sec, Zeit_msec = 60*60;
 	string string_Punktestand, string_Zeit;
 	vector<Huhn> Huehner;
 	
@@ -231,7 +231,7 @@ public:
 		if ((input().down(Gosu::KB_ENTER)|| input().down(Gosu::KB_N))&& !(spiel_läuft))
 		{
 			Punktestand = 0;
-			Zeit_msec = 3 * 60;
+			Zeit_msec = 60 * 60;
 			Schüsse = 5;
 			
 		}
@@ -249,7 +249,7 @@ public:
 					if (Klick_links && !Klick_links_alt &&  (Schüsse>=1))
 					{
 						Klick_links_alt = true;
-						
+						schiesen = true;
 						shot.play(1, 1, false);// hier aktion für Schuss
 						Schüsse = Schüsse - 1;
 
@@ -287,6 +287,8 @@ public:
 				
 
 			}
+			
+			/*
 			{
 				if (Schüsse >= 1)
 				{
@@ -294,7 +296,7 @@ public:
 					if (Klick_links && !Klick_links_alt)
 					{
 						Klick_links_alt = true;
-
+						schiesen = true;
 						shot.play(1, 1, false);// hier aktion für Schuss
 						Schüsse = Schüsse - 1;
 
@@ -327,7 +329,7 @@ public:
 
 
 			}
-
+			*/
 			
 
 			// Hühner wieder auftauchen lassen
