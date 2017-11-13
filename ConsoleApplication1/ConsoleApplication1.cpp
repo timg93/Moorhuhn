@@ -71,10 +71,10 @@ public:
 		if (((x >= this->XPos) && (x <= (this->XPos + Breite))) &&
 			((y >= this->YPos) && (y <= (this->YPos + Höhe))) && this->Sichtbarkeit)
 		{
-			cout << "XPos: " << this->XPos << endl;
+			/*cout << "XPos: " << this->XPos << endl;
 			cout << "YPos: " << this->YPos << endl;
 			cout << "Breite: " << this->Breite << endl;
-			cout << "Höhe: " << this->Höhe << endl;
+			cout << "Höhe: " << this->Höhe << endl;*/
 
 			this->ZEbene = -7;
 			Sichtbarkeit = false;
@@ -102,8 +102,8 @@ public:
 		this->Höhe = this->Bild.height() * this->SkalY;
 		this->Breite = this->Bild.width() * this->SkalX;
 
-		cout << "Höhe: " << this->Höhe << endl;
-		cout << "Breite: " << this->Breite << endl;
+		//cout << "Höhe: " << this->Höhe << endl;
+		//cout << "Breite: " << this->Breite << endl;
 
 		this->Sichtbarkeit = sichtbarkeit;
 		this->Wandern = wandern;
@@ -183,6 +183,7 @@ public:
 		Huhn H50(false, true, true, 3, 0, 50, -7, 0, 0, 0, 0.1, 0.1, 100, "MH_fliegt_vonlinks.png");		//fliegende Hühner
 		Huhn H51(false, true, true, 2, 0, 250, -7, 0, 0, 0, 0.2, 0.2, 25, "MH_fliegt_vonlinks.png");		//fliegende Hühner
 		Huhn H52(false, true, true, 5, 0, 500, -7, 0, 0, 0, 0.3, 0.3, 5, "MH_fliegt_vonlinks.png");		//fliegende Hühner
+		Huhn H53(false, true, true, 5, 0, 950, -7, 0, 0, 0, 0.3, 0.3, 5, "CAR.png");		//fliegende Hühner
 
 		Huehner.push_back(H01);
 		Huehner.push_back(H02);
@@ -198,13 +199,14 @@ public:
 		Huehner.push_back(H50);
 		Huehner.push_back(H51);
 		Huehner.push_back(H52);
+		Huehner.push_back(H53);
 
 	}
 
 	double x, y, Punktestand = 0;
 	bool Klick_links, Klick_links_alt, Klick_rechts, Klick_rechts_alt, schiesen, laden;
 	bool H1 = true, H2 = true, H3 = true, spiel_läuft=true;
-	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 13, Zufallszahl, Zi = 0, Zeit_sec, Zeit_msec = 60*60;
+	int Schüsse = 5, Zufallszahl_von = 1, Zufallszahl_bis = 14, Zufallszahl, Zi = 0, Zeit_sec, Zeit_msec = 60*60;
 	string string_Punktestand, string_Zeit;
 	vector<Huhn> Huehner;
 	
@@ -388,7 +390,7 @@ public:
 		if (spiel_läuft)
 		{
 			Zeit_msec = Zeit_msec - 1;
-			cout << Zeit_msec << endl;
+			//cout << Zeit_msec << endl;
 
 			for (Huhn& elem : Huehner) {
 				elem.draw();
