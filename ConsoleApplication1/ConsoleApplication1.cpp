@@ -181,9 +181,9 @@ public:
 		Huhn H10(false, false, true, 1, 800, 600, -7, 0, 0, 0, 1, 1, 1, "MH_Gangsta.png");		//Rechts neben Heuballen*/
 
 		Huhn H50(false, true, true, 3, 0, 50, -7, 0, 0, 0, 0.1, 0.1, 100, "MH_fliegt_vonlinks.png");		//fliegende Hühner
-		Huhn H51(false, true, true, 2, 0, 250, -7, 0, 0, 0, 0.2, 0.2, 25, "MH_fliegt_vonlinks.png");		//fliegende Hühner
-		Huhn H52(false, true, true, 5, 0, 500, -7, 0, 0, 0, 0.3, 0.3, 5, "MH_fliegt_vonlinks.png");		//fliegende Hühner
-		Huhn H53(false, true, true, 5, 0, 950, -7, 0, 0, 0, 0.3, 0.3, 5, "CAR.png");		//fliegende Hühner
+		Huhn H51(false, true, true, 2, 0, 250, -7, 0, 0, 0, 0.2, 0.2, 75, "MH_fliegt_vonlinks.png");		//fliegende Hühner
+		Huhn H52(false, true, true, 5, 0, 500, -7, 0, 0, 0, 0.3, 0.3, 50, "MH_fliegt_vonlinks.png");		//fliegende Hühner
+		Huhn H53(false, true, true, 5, 0, 950, -7, 0, 0, 0, 0.3, 0.3, -500, "CAR.png");		//fliegende Hühner
 
 		Huehner.push_back(H01);
 		Huehner.push_back(H02);
